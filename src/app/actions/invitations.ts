@@ -96,7 +96,7 @@ export async function signUpForInvitation(_prev: InvitationFormState, formData: 
     password,
     options: {
       data: { display_name: displayName },
-      emailRedirectTo: `${publicEnv.siteUrl}/auth/confirm?next=${encodeURIComponent(`/invite/${token}`)}`,
+      emailRedirectTo: `${publicEnv.siteUrl}/invite/${token}`,
     },
   });
   if (error) return formError(describeError(error));

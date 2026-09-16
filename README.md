@@ -26,8 +26,13 @@ private `couple-media` storage bucket with its policies.
 
 **Authentication → URL Configuration**
 
-- Site URL: `http://localhost:3000` (your production URL when you deploy)
-- Redirect URLs: `http://localhost:3000/**`, plus `https://<your-domain>/**` later
+- Redirect URLs: add every address the app runs on, each ending in `/**`, for
+  example `http://localhost:3000/**` and `https://<your-app>.vercel.app/**`.
+- Site URL: your production URL.
+
+Email links follow the app's `NEXT_PUBLIC_SITE_URL`, but only for addresses in the
+Redirect URLs list. Any other address is replaced by the Site URL, which is how
+production emails end up linking to localhost.
 
 **Authentication → Sign In / Providers → Email**
 
@@ -37,8 +42,10 @@ private `couple-media` storage bucket with its policies.
 
 **Authentication → Emails → Templates** (recommended)
 
-Paste each file's HTML into the matching template. They send people through
-`/auth/confirm`, which verifies the link on the server and works on any device:
+Paste each file's HTML into the matching template. The links are built from
+`{{ .RedirectTo }}` (the page the app asked for) rather than the Site URL, so the
+same templates work locally and in production. The link is verified on the
+server and works on any device:
 
 | Template          | File                                                        | Suggested subject                                     |
 | ----------------- | ----------------------------------------------------------- | ----------------------------------------------------- |

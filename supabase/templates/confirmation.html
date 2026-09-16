@@ -8,7 +8,7 @@
             <p style="margin:0 0 8px;font:600 12px/1.4 -apple-system,'Segoe UI',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#b4553d">Our Story</p>
             <h1 style="margin:0 0 16px;font-size:28px;line-height:1.2;font-weight:500">Confirm your email</h1>
             <p style="margin:0 0 28px;font-size:17px;line-height:1.6">Confirm your address to finish creating your Our Story account. If you arrived through an invitation, you&#39;ll continue right where you left off.</p>
-            <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&redirect_to={{ .RedirectTo }}" style="display:inline-block;background:#b4553d;color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:999px;font:600 15px/1 -apple-system,'Segoe UI',sans-serif">Confirm Email</a>
+            <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email" style="display:inline-block;background:#b4553d;color:#ffffff;text-decoration:none;padding:14px 26px;border-radius:999px;font:600 15px/1 -apple-system,'Segoe UI',sans-serif">Confirm Email</a>
             <p style="margin:28px 0 0;font:14px/1.6 -apple-system,'Segoe UI',sans-serif;color:#7a6c64">If you didn&#39;t sign up, you can ignore this email.</p>
           </td></tr>
         </table>

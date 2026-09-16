@@ -3,8 +3,8 @@ import { publicEnv } from "@/lib/env";
 /**
  * Turns an untrusted `next` / `redirect_to` value into a same-origin path.
  * Anything off-site, protocol-relative or malformed falls back.
- * A nested /auth/confirm?next=... is unwrapped so email templates that pass
- * {{ .RedirectTo }} through do not cause a double hop.
+ * A nested /auth/confirm?next=... is unwrapped, so older email links that
+ * pointed at /auth/confirm directly still land on the right page.
  */
 export function safeRedirectPath(value: string | null | undefined, fallback = "/"): string {
   if (!value) return fallback;

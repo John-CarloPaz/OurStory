@@ -48,7 +48,8 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     password: parsed.data.password,
     options: {
       data: { display_name: parsed.data.displayName },
-      emailRedirectTo: `${publicEnv.siteUrl}/auth/confirm?next=${encodeURIComponent(destination === "/home" ? "/onboarding" : destination)}`,
+      // A plain page URL: the email appends ?token_hash=&type=, and the proxy verifies it.
+      emailRedirectTo: `${publicEnv.siteUrl}${new URL(destination === "/home" ? "/onboarding" : destination, publicEnv.siteUrl).pathname}`,
     },
   });
   if (error) return formError(describeError(error));
@@ -75,7 +76,7 @@ export async function requestPasswordReset(_prev: FormState, formData: FormData)
 
   const supabase = await createSupabaseServerClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${publicEnv.siteUrl}/auth/confirm?next=${encodeURIComponent("/account/password")}`,
+    redirectTo: `${publicEnv.siteUrl}/account/password`,
   });
   // Same answer whether or not the account exists.
   return formSuccess("If an account exists for that email, a reset link is on its way.");
