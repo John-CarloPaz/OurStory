@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { clearInvitationCookies, setActiveCoupleCookie } from "@/lib/cookies";
 import { getInvitationMailer } from "@/lib/email";
-import { publicEnv } from "@/lib/env";
 import { describeCode, describeError } from "@/lib/errors";
 import { formError, parseForm, type FormState } from "@/lib/forms";
 import {
@@ -16,6 +15,7 @@ import {
   resendInvitation,
   type InvitationOutcome,
 } from "@/lib/invitations/service";
+import { getSiteUrl } from "@/lib/site-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireActiveSpace, requireSession } from "@/lib/tenant";
@@ -96,7 +96,7 @@ export async function signUpForInvitation(_prev: InvitationFormState, formData: 
     password,
     options: {
       data: { display_name: displayName },
-      emailRedirectTo: `${publicEnv.siteUrl}/invite/${token}`,
+      emailRedirectTo: `${getSiteUrl()}/invite/${token}`,
     },
   });
   if (error) return formError(describeError(error));

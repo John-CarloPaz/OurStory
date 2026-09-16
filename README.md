@@ -73,7 +73,7 @@ Copy `.env.example` to `.env.local` and fill in your project values:
 | `NEXT_PUBLIC_SUPABASE_URL`             | Project URL                                                      |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key (browser safe)                                   |
 | `SUPABASE_SECRET_KEY`                  | Server only; used just to send invitation emails via Supabase Auth |
-| `NEXT_PUBLIC_SITE_URL`                 | Public URL used in email links                                   |
+| `NEXT_PUBLIC_SITE_URL`                 | Public URL used in email links. Read at request time; on Vercel it defaults to the production domain |
 | `INVITATION_TTL_DAYS`                  | Invitation lifetime, default 7                                   |
 | `INVITATION_EMAIL_DELIVERY`            | `supabase` (default) or `console` for local development          |
 

@@ -1,6 +1,6 @@
 import "server-only";
 import { getInvitationMailer } from "@/lib/email";
-import { publicEnv } from "@/lib/env";
+import { getSiteUrl } from "@/lib/site-url";
 import { describeError } from "@/lib/errors";
 import { generateInvitationToken } from "@/lib/invitations/token";
 import { serverEnv } from "@/lib/server-env";
@@ -33,7 +33,7 @@ export type InvitationOutcome = {
 export type ServiceResult<T> = { ok: true; value: T } | { ok: false; error: string; code?: string; retryAfterSeconds?: number };
 
 export function invitationUrl(token: string): string {
-  return `${publicEnv.siteUrl}/invite/${token}`;
+  return `${getSiteUrl()}/invite/${token}`;
 }
 
 async function deliver(token: string, invitation: RpcInvitation): Promise<InvitationOutcome> {

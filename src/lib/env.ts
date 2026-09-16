@@ -1,6 +1,7 @@
 /**
  * Public configuration. NEXT_PUBLIC_* values must be referenced literally so
- * Next.js can inline them into client bundles.
+ * Next.js can inline them into client bundles. The site URL is resolved at
+ * request time instead; see src/lib/site-url.ts.
  */
 
 function required(name: string, value: string | undefined): string {
@@ -16,7 +17,6 @@ export const publicEnv = {
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   ),
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/+$/, ""),
 };
 
 export const APP_NAME = "Our Story";

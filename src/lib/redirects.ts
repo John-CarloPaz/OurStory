@@ -1,4 +1,4 @@
-import { publicEnv } from "@/lib/env";
+import { getSiteUrl } from "@/lib/site-url";
 
 /**
  * Turns an untrusted `next` / `redirect_to` value into a same-origin path.
@@ -11,12 +11,12 @@ export function safeRedirectPath(value: string | null | undefined, fallback = "/
 
   let url: URL;
   try {
-    url = new URL(value, publicEnv.siteUrl);
+    url = new URL(value, getSiteUrl());
   } catch {
     return fallback;
   }
 
-  const site = new URL(publicEnv.siteUrl);
+  const site = new URL(getSiteUrl());
   const isRelative = value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
   if (!isRelative && url.origin !== site.origin) return fallback;
 
