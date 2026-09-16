@@ -1,0 +1,5 @@
+# Normalize line endings so SQL, scripts and sources are identical on every OS.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

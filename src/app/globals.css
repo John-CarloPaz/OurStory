@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Every color, font and spacing value used by components comes
+ * from --os-* custom properties. The root layout sets the default "paper"
+ * theme; each couple's workspace overrides them from its couple_themes row
+ * (see src/lib/theme.ts). Nothing here is tenant-specific.
+ */
+
+@theme inline {
+  --color-canvas: var(--os-bg);
+  --color-ink: var(--os-ink);
+  --color-muted: var(--os-muted);
+  --color-line: var(--os-line);
+  --color-accent: var(--os-primary);
+  --color-on-accent: var(--os-primary-ink);
+  --color-accent-soft: var(--os-primary-soft);
+  --color-card: var(--os-card);
+  --color-field: var(--os-field);
+  --color-danger: #b42318;
+
+  --font-display: var(--os-font-display), ui-serif, Georgia, serif;
+  --font-body: var(--os-font-body), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--os-bg);
+    color: var(--os-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--os-primary-soft);
+    color: var(--os-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--os-primary);
+    outline-offset: 2px;
+  }
+
+  input[type="date"],
+  input[type="time"] {
+    color-scheme: inherit;
+  }
+}
+
+@layer components {
+  .os-card {
+    background: var(--os-card);
+    border: 1px solid var(--os-card-border);
+    box-shadow: var(--os-card-shadow);
+    border-radius: 1.25rem;
+  }
+
+  .os-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+    font-size: calc(1em * var(--os-display-scale, 1));
+  }
+
+  .os-prose {
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .os-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--os-primary);
+  }
+
+  .os-stack > * + * {
+    margin-top: var(--os-gap, 1.25rem);
+  }
+
+  .os-sections > * + * {
+    margin-top: var(--os-section-gap, 2.75rem);
+  }
+
+  /* Backgrounds */
+  .os-bg-plain {
+    background-color: var(--os-bg);
+  }
+
+  .os-bg-paper {
+    background-color: var(--os-bg);
+    background-image:
+      radial-gradient(1200px 600px at 12% -10%, color-mix(in srgb, var(--os-primary) 7%, transparent), transparent 70%),
+      radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--os-ink) 4%, transparent), transparent 70%);
+    background-attachment: fixed;
+  }
+
+  .os-bg-grain {
+    background-color: var(--os-bg);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .os-bg-gradient {
+    background-color: var(--os-bg);
+    background-image: linear-gradient(180deg, var(--os-primary-soft) 0%, var(--os-bg) 520px);
+  }
+}

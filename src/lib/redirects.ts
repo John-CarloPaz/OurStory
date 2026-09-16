@@ -1,0 +1,31 @@
+import { publicEnv } from "@/lib/env";
+
+/**
+ * Turns an untrusted `next` / `redirect_to` value into a same-origin path.
+ * Anything off-site, protocol-relative or malformed falls back.
+ * A nested /auth/confirm?next=... is unwrapped so email templates that pass
+ * {{ .RedirectTo }} through do not cause a double hop.
+ */
+export function safeRedirectPath(value: string | null | undefined, fallback = "/"): string {
+  if (!value) return fallback;
+
+  let url: URL;
+  try {
+    url = new URL(value, publicEnv.siteUrl);
+  } catch {
+    return fallback;
+  }
+
+  const site = new URL(publicEnv.siteUrl);
+  const isRelative = value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\");
+  if (!isRelative && url.origin !== site.origin) return fallback;
+
+  if (url.pathname === "/auth/confirm") {
+    return safeRedirectPath(url.searchParams.get("next"), fallback);
+  }
+
+  return `${url.pathname}${url.search}`;
+}
+
+export const PENDING_INVITE_COOKIE = "os_pending_invite";
+export const ACTIVE_COUPLE_COOKIE = "os_active_couple";
