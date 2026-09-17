@@ -7,9 +7,9 @@ import type { CSSProperties } from "react";
  */
 
 export const THEME_PRESET_NAMES = ["paper", "linen", "blush", "sage", "midnight"] as const;
-export const CARD_STYLES = ["soft", "flat", "outlined", "elevated"] as const;
+export const CARD_STYLES = ["glass", "soft", "flat", "outlined", "elevated"] as const;
 export const TYPOGRAPHY_OPTIONS = ["editorial", "modern", "classic", "handwritten"] as const;
-export const BACKGROUND_STYLES = ["plain", "paper", "grain", "gradient"] as const;
+export const BACKGROUND_STYLES = ["aurora", "retro", "paper", "grain", "gradient", "plain"] as const;
 export const LAYOUTS = ["comfortable", "compact"] as const;
 
 export type ThemePresetName = (typeof THEME_PRESET_NAMES)[number];
@@ -40,10 +40,27 @@ export const DEFAULT_THEME: ThemeSettings = {
   name: "paper",
   primary_color: THEME_PRESETS.paper.primary,
   background_color: THEME_PRESETS.paper.background,
-  card_style: "soft",
+  card_style: "glass",
   typography: "editorial",
-  background_style: "paper",
+  background_style: "aurora",
   layout: "comfortable",
+};
+
+export const CARD_STYLE_LABELS: Record<CardStyle, string> = {
+  glass: "Glass",
+  soft: "Paper",
+  flat: "Flat",
+  outlined: "Outline",
+  elevated: "Lifted",
+};
+
+export const BACKGROUND_STYLE_LABELS: Record<BackgroundStyle, string> = {
+  aurora: "Aurora",
+  retro: "Retro",
+  paper: "Paper",
+  grain: "Grain",
+  gradient: "Sunset",
+  plain: "Plain",
 };
 
 export const TYPOGRAPHY_LABELS: Record<Typography, string> = {
@@ -70,6 +87,11 @@ function mix(a: string, b: string, amount: number): string {
   const x = hexToRgb(a);
   const y = hexToRgb(b);
   return rgbToHex([0, 1, 2].map((i) => x[i] + (y[i] - x[i]) * amount) as Rgb);
+}
+
+function rgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgb(${r} ${g} ${b} / ${alpha})`;
 }
 
 function luminance(hex: string): number {
@@ -138,6 +160,14 @@ export function themeVariables(theme: ThemeSettings): CSSProperties {
 
   const cardBase = dark ? mix(bg, "#ffffff", 0.06) : mix(bg, "#ffffff", 0.62);
   const cards: Record<CardStyle, { bg: string; border: string; shadow: string }> = {
+    glass: {
+      // No backdrop blur behind cards (too costly), so a little more opaque to stay readable.
+      bg: dark ? rgba(mix(bg, "#ffffff", 0.1), 0.64) : rgba(mix(bg, "#ffffff", 0.8), 0.7),
+      border: dark ? "rgb(255 255 255 / 0.1)" : "rgb(255 255 255 / 0.7)",
+      shadow: dark
+        ? "0 1px 0 rgb(255 255 255 / 0.06) inset, 0 20px 50px -24px rgb(0 0 0 / 0.7)"
+        : "0 1px 0 rgb(255 255 255 / 0.8) inset, 0 24px 60px -32px rgb(70 40 30 / 0.35)",
+    },
     soft: {
       bg: cardBase,
       border: mix(bg, ink, 0.08),
@@ -154,6 +184,11 @@ export function themeVariables(theme: ThemeSettings): CSSProperties {
   const card = cards[theme.card_style];
   const fonts = FONT_STACKS[theme.typography];
 
+  // Ambient background colors: the accent plus two harmonizing tints.
+  const warm = mix(primary, "#ffb36b", 0.45);
+  const cool = mix(primary, dark ? "#6f7cff" : "#8ec5ff", 0.55);
+  const blobStrength = dark ? 0.55 : 0.5;
+
   return {
     "--os-bg": bg,
     "--os-ink": ink,
@@ -165,6 +200,13 @@ export function themeVariables(theme: ThemeSettings): CSSProperties {
     "--os-card": card.bg,
     "--os-card-border": card.border,
     "--os-card-shadow": card.shadow,
+    "--os-glass": dark ? rgba(mix(bg, "#ffffff", 0.08), 0.8) : rgba(mix(bg, "#ffffff", 0.85), 0.8),
+    "--os-frost": dark ? rgba(mix(bg, "#ffffff", 0.08), 0.72) : rgba(mix(bg, "#ffffff", 0.85), 0.72),
+    "--os-glass-border": dark ? "rgb(255 255 255 / 0.1)" : "rgb(255 255 255 / 0.75)",
+    "--os-blob-1": rgba(mix(bg, primary, 0.75), blobStrength),
+    "--os-blob-2": rgba(mix(bg, warm, 0.8), blobStrength),
+    "--os-blob-3": rgba(mix(bg, cool, 0.75), blobStrength * 0.9),
+    "--os-grain-opacity": dark ? "0.07" : "0.06",
     "--os-field": dark ? mix(bg, "#ffffff", 0.08) : mix(bg, "#ffffff", 0.75),
     "--os-font-display": fonts.display,
     "--os-font-body": fonts.body,

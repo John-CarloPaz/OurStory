@@ -15,8 +15,8 @@ export default async function EditJournalPage({ params }: { params: Promise<{ id
 
   const space = await requireActiveSpace();
   const [journal, places, links] = await Promise.all([
-    space.supabase.from("journals").select("id, title, entry_date, mood, body").eq("id", id).maybeSingle(),
-    space.supabase.from("places").select("id, name, category").order("name"),
+    space.supabase.from("journals").select("id, title, entry_date, mood, body").eq("id", id).eq("couple_id", space.coupleId).maybeSingle(),
+    space.supabase.from("places").select("id, name, category").eq("couple_id", space.coupleId).order("name"),
     space.supabase.from("place_journals").select("place_id").eq("journal_id", id),
   ]);
   // RLS: an entry from another space is indistinguishable from one that doesn't exist.

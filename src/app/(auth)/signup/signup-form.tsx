@@ -21,7 +21,7 @@ export function SignUpForm({ next }: { next?: string }) {
         <Input name="password" type="password" autoComplete="new-password" required minLength={8} state={state} />
       </Field>
       <FormMessage state={state} />
-      <SubmitButton pending={pending} className="w-full" pendingText="Creating your account…">
+      <SubmitButton pending={pending} size="lg" className="w-full" pendingText="Creating your account…">
         Create account
       </SubmitButton>
     </form>

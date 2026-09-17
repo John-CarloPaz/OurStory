@@ -33,24 +33,27 @@ export default async function CalendarPage({
     supabase
       .from("events")
       .select("id, title, description, starts_at, ends_at, all_day, location, place_id, places(name)")
+      .eq("couple_id", space.coupleId)
       .gte("starts_at", zonedTimeToUtc(gridStart, "00:00", tz).toISOString())
       .lt("starts_at", zonedTimeToUtc(addDays(gridEnd, 1), "00:00", tz).toISOString())
       .order("starts_at"),
     supabase
       .from("journals")
       .select("id, title, mood, body, entry_date, created_by, journal_photos(id, storage_path, thumb_path, caption, created_at)")
+      .eq("couple_id", space.coupleId)
       .gte("entry_date", gridStart)
       .lte("entry_date", gridEnd)
       .order("created_at"),
     supabase
       .from("milestones")
       .select("id, title, description, occurred_on, icon")
+      .eq("couple_id", space.coupleId)
       .gte("occurred_on", gridStart)
       .lte("occurred_on", gridEnd)
       .order("created_at"),
-    supabase.from("places").select("id, name").order("name"),
+    supabase.from("places").select("id, name").eq("couple_id", space.coupleId).order("name"),
     editId
-      ? supabase.from("events").select("id, title, description, starts_at, ends_at, all_day, location, place_id").eq("id", editId).maybeSingle()
+      ? supabase.from("events").select("id, title, description, starts_at, ends_at, all_day, location, place_id").eq("id", editId).eq("couple_id", space.coupleId).maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
@@ -136,6 +139,7 @@ export default async function CalendarPage({
       <PageHeader
         eyebrow="Calendar"
         title="Your days together"
+        note="day by day"
         description="Plans, stories, milestones and photos, day by day. Pick a date to see everything that happened."
       />
       <CalendarView

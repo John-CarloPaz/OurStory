@@ -6,8 +6,9 @@ import type { FormState } from "@/lib/forms";
 import { buttonClass } from "./button";
 
 const control =
-  "w-full rounded-xl border border-line bg-field px-3.5 text-[0.9375rem] text-ink placeholder:text-muted/80 " +
-  "transition focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15 disabled:opacity-60 " +
+  "w-full rounded-2xl border border-[var(--os-glass-border)] bg-[color-mix(in_srgb,var(--os-field)_90%,transparent)] px-4 text-[0.9375rem] text-ink " +
+  "shadow-[0_1px_2px_rgb(0_0_0/0.04)_inset] placeholder:text-muted/80 " +
+  "transition duration-200 focus:border-accent focus:bg-field focus:outline-none focus:ring-4 focus:ring-accent/15 disabled:opacity-60 " +
   "aria-[invalid=true]:border-danger";
 
 export function Field({
@@ -99,7 +100,7 @@ export function FormMessage({ state }: { state: FormState }) {
   return (
     <p
       role={error ? "alert" : "status"}
-      className={`rounded-xl px-4 py-3 text-sm ${error ? "bg-danger/10 text-danger" : "bg-accent-soft text-ink"}`}
+      className={`os-pop rounded-2xl px-4 py-3 text-sm ${error ? "bg-danger/10 text-danger" : "bg-accent-soft text-ink"}`}
     >
       {state.message}
     </p>

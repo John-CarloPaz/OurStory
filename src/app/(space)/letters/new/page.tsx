@@ -19,8 +19,13 @@ export default async function NewLetterPage() {
   if (!space.partner) redirect("/letters");
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <PageHeader eyebrow="A letter" title={`For ${space.partner.displayName}`} />
+    <div className="mx-auto max-w-3xl space-y-10">
+      <PageHeader
+        eyebrow="A letter"
+        title={`For ${space.partner.displayName}`}
+        note="from the heart"
+        description="Address the envelope, write your letter, then choose the day it opens."
+      />
       <LetterForm recipientName={space.partner.displayName} defaultUnlockDate={addDays(todayIn(await getViewerTimeZone()), 7)} />
     </div>
   );

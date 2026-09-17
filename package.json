@@ -34,9 +34,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "pg": "^8.23.0",
+    "playwright-core": "^1.63.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.11",
-    "sharp": "^0.35.4"
+    "vitest": "^4.1.11"
   }
 }

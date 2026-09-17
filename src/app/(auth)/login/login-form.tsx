@@ -19,11 +19,11 @@ export function LoginForm({ next, email }: { next?: string; email?: string }) {
         <Input name="password" type="password" autoComplete="current-password" required state={state} />
       </Field>
       <FormMessage state={state} />
-      <SubmitButton pending={pending} className="w-full" pendingText="Signing in…">
+      <SubmitButton pending={pending} size="lg" className="w-full" pendingText="Signing in…">
         Sign in
       </SubmitButton>
-      <p className="text-center text-sm">
-        <Link href="/forgot-password" className="text-muted hover:text-ink hover:underline">
+      <p className="-mt-1 text-center text-sm">
+        <Link href="/forgot-password" className="inline-flex min-h-10 items-center text-muted underline-offset-4 hover:text-ink hover:underline">
           Forgot your password?
         </Link>
       </p>

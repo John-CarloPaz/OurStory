@@ -13,10 +13,10 @@ export function ReflectionForm({ journalId, partnerName }: { journalId: string; 
   return (
     <form {...formProps} className="os-card space-y-4 p-5 sm:p-6">
       <input type="hidden" name="journalId" value={journalId} />
-      <label htmlFor="body" className="os-display block text-xl text-ink">
-        Add your reflection
+      <label htmlFor="body" className="os-hand block text-3xl text-ink">
+        Add your reflection ✎
       </label>
-      <Textarea name="body" required maxLength={20000} rows={4} placeholder="How did this day feel to you?" className="os-prose !text-base" state={state} />
+      <Textarea name="body" required maxLength={20000} rows={4} placeholder="How did this day feel to you?" className="os-hand !text-xl leading-snug" state={state} />
       <fieldset className="flex flex-wrap gap-2">
         <legend className="sr-only">Who can see this</legend>
         <label className="cursor-pointer">
@@ -46,8 +46,8 @@ export function CaptionForm({ photoId, caption }: { photoId: string; caption: st
 
   if (!editing) {
     return (
-      <button type="button" onClick={() => setEditing(true)} className="min-w-0 text-left text-sm text-muted hover:text-ink">
-        {caption || <span className="opacity-70">Add a caption</span>}
+      <button type="button" onClick={() => setEditing(true)} className="os-hand min-w-0 truncate text-left text-lg leading-tight text-[#4a3b33] hover:text-black">
+        {caption || <span className="opacity-60">add a caption…</span>}
       </button>
     );
   }
@@ -62,7 +62,7 @@ export function CaptionForm({ photoId, caption }: { photoId: string; caption: st
           maxLength={500}
           autoFocus
           aria-label="Caption"
-          className="h-8 min-w-0 flex-1 rounded-lg border border-line bg-field px-2 text-sm text-ink focus:border-accent focus:outline-none"
+          className="h-8 min-w-0 flex-1 rounded-lg border border-[#e0d6c8] bg-white px-2 text-sm text-[#3b2f2a] focus:border-accent focus:outline-none"
         />
         <SubmitButton size="sm" pending={pending} className="!h-8 !px-3">
           Save

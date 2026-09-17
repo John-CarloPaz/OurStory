@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { savePlace } from "@/app/actions/content";
 import { PLACE_META } from "@/components/content-meta";
+import { buttonClass } from "@/components/ui/button";
 import { Field, FormMessage, Input, Select, SubmitButton, Textarea } from "@/components/ui/form";
 import { IDLE } from "@/lib/forms";
 import { useFormAction } from "@/components/ui/use-form-action";
+import { PostageStamp } from "./postcard-parts";
 
 type Place = {
   id: string;
@@ -21,8 +23,14 @@ export function PlaceForm({ place }: { place?: Place }) {
   const { state, pending, formProps } = useFormAction(savePlace, IDLE, { resetOnSuccess: !place });
 
   return (
-    <form {...formProps} className="os-card space-y-5 p-6">
-      <h2 className="os-display text-2xl text-ink">{place ? "Edit place" : "Add a place"}</h2>
+    <form {...formProps} className="os-card relative space-y-5 p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="os-eyebrow">{place ? "Editing a postcard" : "New postcard"}</p>
+          <h2 className="os-display mt-1 text-2xl text-ink">{place ? "Edit place" : "Add a place"}</h2>
+        </div>
+        <PostageStamp category={place?.category ?? "travel"} size="sm" className="-mt-1 mr-1 shrink-0" />
+      </div>
       {place ? <input type="hidden" name="placeId" value={place.id} /> : null}
       <Field label="Name" name="name" state={state}>
         <Input name="name" required maxLength={160} defaultValue={place?.name} placeholder="Café Lumière" state={state} />
@@ -51,13 +59,23 @@ export function PlaceForm({ place }: { place?: Place }) {
         <Input name="firstVisitedOn" type="date" defaultValue={place?.first_visited_on ?? ""} state={state} />
       </Field>
       <Field label="Why it matters" name="description" state={state} optional>
-        <Textarea name="description" rows={3} maxLength={5000} defaultValue={place?.description ?? ""} state={state} />
+        <Textarea
+          name="description"
+          rows={3}
+          maxLength={5000}
+          defaultValue={place?.description ?? ""}
+          placeholder="What you remember most…"
+          state={state}
+          className="os-hand !text-xl !leading-snug"
+        />
       </Field>
       <FormMessage state={state} />
       <div className="flex items-center gap-3">
-        <SubmitButton pending={pending} pendingText="Saving…">{place ? "Save" : "Add place"}</SubmitButton>
+        <SubmitButton pending={pending} pendingText="Saving…">
+          {place ? "Save" : "Add place"}
+        </SubmitButton>
         {place ? (
-          <Link href="/places" className="text-sm text-muted hover:text-ink">
+          <Link href="/places" className={buttonClass("ghost")}>
             Cancel
           </Link>
         ) : null}

@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    // Reuse a page the viewer saw in the last 30 seconds when switching tabs,
+    // instead of re-rendering it on the server. Saving anything revalidates.
+    staleTimes: { dynamic: 30 },
+  },
   async headers() {
     return [
       {

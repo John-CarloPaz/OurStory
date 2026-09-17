@@ -370,6 +370,9 @@ export type Database = {
           mood: string | null;
           created_at: string;
           updated_at: string;
+          scrapbook: Json | null;
+          scrapbook_updated_at: string | null;
+          scrapbook_updated_by: string | null;
         };
         Insert: {
           id?: string;
@@ -381,6 +384,9 @@ export type Database = {
           mood?: string | null;
           created_at?: string;
           updated_at?: string;
+          scrapbook?: Json | null;
+          scrapbook_updated_at?: string | null;
+          scrapbook_updated_by?: string | null;
         };
         Update: {
           id?: string;
@@ -392,6 +398,9 @@ export type Database = {
           mood?: string | null;
           created_at?: string;
           updated_at?: string;
+          scrapbook?: Json | null;
+          scrapbook_updated_at?: string | null;
+          scrapbook_updated_by?: string | null;
         };
         Relationships: [
           {

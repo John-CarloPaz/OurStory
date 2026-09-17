@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "New entry" };
 export default async function NewJournalPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { date } = await searchParams;
   const space = await requireActiveSpace();
-  const { data: places } = await space.supabase.from("places").select("id, name, category").order("name");
+  const { data: places } = await space.supabase.from("places").select("id, name, category").eq("couple_id", space.coupleId).order("name");
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">

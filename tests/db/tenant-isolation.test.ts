@@ -364,6 +364,20 @@ describe("tenant isolation", () => {
     );
   });
 
+  it("scrapbook pages are shared by the couple, private from everyone else, and must be an object", async () => {
+    const page = JSON.stringify({ version: 1, page: { paper: "kraft" }, elements: [] });
+    const saved = await db.query(A.b, `update journals set scrapbook = $1::jsonb, scrapbook_updated_at = now(), scrapbook_updated_by = auth.uid() where id = $2`, [page, A.journalId]);
+    expect(saved.rowCount).toBe(1);
+    const readByPartner = await db.query(A.a, `select scrapbook->'page'->>'paper' as paper from journals where id = $1`, [A.journalId]);
+    expect(readByPartner.rows[0].paper).toBe("kraft");
+
+    const outsider = await db.query(B.a, `update journals set scrapbook = '{}'::jsonb where id = $1`, [A.journalId]);
+    expect(outsider.rowCount).toBe(0);
+    expect((await db.query(B.a, `select scrapbook from journals where id = $1`, [A.journalId])).rowCount).toBe(0);
+
+    await expectDbError(db.query(A.a, `update journals set scrapbook = '[1,2,3]'::jsonb where id = $1`, [A.journalId]), "journals_scrapbook_shape");
+  });
+
   it("cannot move a row between tenants, even between two spaces you belong to", async () => {
     await expectDbError(
       db.query(C.a, `update journals set couple_id = $1 where id = $2`, [D.coupleId, C.journalId]),

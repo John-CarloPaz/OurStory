@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPendingInviteToken } from "@/lib/cookies";
-import { APP_NAME } from "@/lib/env";
 import { getInvitationPreview } from "@/lib/invitations/service";
 import { getMemberships, requireAccount } from "@/lib/tenant";
+import { BrandMark } from "@/components/decor/scene";
 import { CreateSpaceForm } from "./create-space-form";
 
 export const metadata: Metadata = { title: "Create your space" };
@@ -26,11 +25,11 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center px-4 py-12">
-      <Link href="/home" className="os-display mb-8 block text-center text-2xl text-ink">
-        {APP_NAME} <span className="text-accent">♡</span>
-      </Link>
-      <CreateSpaceForm defaultName={session.metadata.display_name ?? ""} />
+    <main className="relative min-h-dvh overflow-x-clip px-4 py-10 sm:py-16">
+      <div className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-xl flex-col justify-center sm:min-h-[calc(100dvh-8rem)]">
+        <BrandMark href="/home" className="mx-auto mb-10 text-2xl" />
+        <CreateSpaceForm defaultName={session.metadata.display_name ?? ""} />
+      </div>
     </main>
   );
 }

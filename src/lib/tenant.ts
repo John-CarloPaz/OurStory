@@ -18,6 +18,8 @@ import { createSupabaseServerClient, type SupabaseServerClient } from "@/lib/sup
  *   - Every data query still runs as you, so RLS is the final word.
  */
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type UserMetadata = {
   display_name?: string;
   needs_password?: boolean;
@@ -101,46 +103,51 @@ export const getMemberships = cache(async () => {
   return data;
 });
 
+/** A couple with its theme, members and open invitation, in a single request. */
+async function loadCouple(supabase: SupabaseServerClient, coupleId: string) {
+  return supabase
+    .from("couples")
+    .select(
+      "*, couple_themes(*), couple_members(user_id, role, avatar_path, joined_at), couple_invitations(id, invited_email, expires_at, created_at, last_sent_at, sends_in_window)",
+    )
+    .eq("id", coupleId)
+    .is("couple_invitations.accepted_at", null)
+    .is("couple_invitations.cancelled_at", null)
+    .order("joined_at", { referencedTable: "couple_members", ascending: true })
+    .single();
+}
+
 export const getActiveSpace = cache(async (): Promise<ActiveSpace | null> => {
   const session = await requireAccount();
+  const { supabase } = session;
+  const preferred = (await cookies()).get(ACTIVE_COUPLE_COOKIE)?.value;
+
+  // Every page waits on this, so start loading the space the cookie points at
+  // while the membership list is still on its way. The result is only used
+  // once that list confirms the membership (RLS would return nothing anyway).
+  const early = preferred && UUID_PATTERN.test(preferred) ? loadCouple(supabase, preferred) : null;
+
   const memberships = await getMemberships();
   if (memberships.length === 0) return null;
 
-  const cookieStore = await cookies();
-  const preferred = cookieStore.get(ACTIVE_COUPLE_COOKIE)?.value;
   const active = memberships.find((m) => m.couple_id === preferred) ?? memberships[0];
   const coupleId = active.couple_id;
-  const { supabase } = session;
+  const { data: loaded, error } = await (early && coupleId === preferred ? early : loadCouple(supabase, coupleId));
+  if (error) throw error;
 
-  const [coupleRes, themeRes, membersRes, invitationRes] = await Promise.all([
-    supabase.from("couples").select("*").eq("id", coupleId).single(),
-    supabase.from("couple_themes").select("*").eq("couple_id", coupleId).single(),
-    supabase
-      .from("couple_members")
-      .select("user_id, role, avatar_path, joined_at")
-      .eq("couple_id", coupleId)
-      .order("joined_at", { ascending: true }),
-    supabase
-      .from("couple_invitations")
-      .select("id, invited_email, expires_at, created_at, last_sent_at, sends_in_window")
-      .eq("couple_id", coupleId)
-      .is("accepted_at", null)
-      .is("cancelled_at", null)
-      .maybeSingle(),
-  ]);
+  const { couple_themes: theme, couple_members: memberRows, couple_invitations: invitations, ...couple } = loaded;
+  if (!theme) throw new Error("This space has no theme row.");
 
-  if (coupleRes.error || themeRes.error || membersRes.error || invitationRes.error) {
-    throw coupleRes.error ?? themeRes.error ?? membersRes.error ?? invitationRes.error;
-  }
-
-  const memberIds = membersRes.data.map((m) => m.user_id);
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
     .select("id, display_name, birthday")
-    .in("id", memberIds);
+    .in(
+      "id",
+      memberRows.map((m) => m.user_id),
+    );
   if (profilesError) throw profilesError;
 
-  const members: SpaceMember[] = membersRes.data.map((m) => {
+  const members: SpaceMember[] = memberRows.map((m) => {
     const profile = profiles.find((p) => p.id === m.user_id);
     return {
       userId: m.user_id,
@@ -159,12 +166,12 @@ export const getActiveSpace = cache(async (): Promise<ActiveSpace | null> => {
   return {
     ...session,
     coupleId,
-    couple: coupleRes.data,
-    theme: themeRes.data,
+    couple,
+    theme,
     members,
     me,
     partner: members.find((m) => !m.isMe) ?? null,
-    pendingInvitation: invitationRes.data,
+    pendingInvitation: invitations[0] ?? null,
     memberships: memberships.map((m) => ({
       coupleId: m.couple_id,
       label: m.couples.name ?? m.couples.display_title,

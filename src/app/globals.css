@@ -1,10 +1,16 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Every color, font and spacing value used by components comes
- * from --os-* custom properties. The root layout sets the default "paper"
- * theme; each couple's workspace overrides them from its couple_themes row
- * (see src/lib/theme.ts). Nothing here is tenant-specific.
+ * Our Story design system.
+ *
+ * Every color, font and spacing value comes from --os-* custom properties set
+ * by src/lib/theme.ts (default theme on <body>, each couple's own theme on the
+ * workspace wrapper). Nothing here is tenant-specific.
+ *
+ *   Look:   frosted glass over a slowly drifting aurora, film grain, and
+ *           scrapbook materials (paper, polaroids, washi tape, stickers).
+ *   Motion: page enter, scroll reveal, pop, float. All of it switches off
+ *           under prefers-reduced-motion.
  */
 
 @theme inline {
@@ -17,24 +23,36 @@
   --color-accent-soft: var(--os-primary-soft);
   --color-card: var(--os-card);
   --color-field: var(--os-field);
-  --color-danger: #b42318;
+  --color-glass: var(--os-glass);
+  --color-danger: #c2410c;
 
   --font-display: var(--os-font-display), ui-serif, Georgia, serif;
   --font-body: var(--os-font-body), ui-serif, Georgia, serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-caveat), "Segoe Print", cursive;
+  --font-marker: var(--font-permanent-marker), var(--font-caveat), cursive;
+  --font-typewriter: var(--font-special-elite), "Courier New", monospace;
+
+}
+
+:root {
+  --os-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --os-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--os-bg);
     color: var(--os-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {
@@ -54,33 +72,79 @@
 }
 
 @layer components {
+  /* Surfaces ------------------------------------------------------------------ */
+
+  /*
+   * Performance: backdrop-filter is re-computed whenever anything behind it
+   * moves (scrolling content, the drifting aurora), so it is expensive. Cards
+   * and small glass pills are translucent WITHOUT blur; only the few floating
+   * surfaces that need to stay legible over moving content add .os-frost
+   * (header, tab bar, menus, the scrapbook editor dock).
+   */
   .os-card {
     background: var(--os-card);
     border: 1px solid var(--os-card-border);
     box-shadow: var(--os-card-shadow);
-    border-radius: 1.25rem;
+    border-radius: 1.5rem;
   }
 
+  .os-glass {
+    background: var(--os-glass);
+    border: 1px solid var(--os-glass-border);
+  }
+
+  .os-frost {
+    background: var(--os-frost);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .os-frost {
+      background: var(--os-field);
+    }
+  }
+
+  .os-lift {
+    transition:
+      transform 0.35s var(--os-ease-out),
+      box-shadow 0.35s var(--os-ease-out);
+  }
+  .os-lift:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      var(--os-card-shadow),
+      0 18px 40px -24px color-mix(in srgb, var(--os-primary) 45%, transparent);
+  }
+
+  /* Type ---------------------------------------------------------------------- */
+
   .os-display {
-    font-family: var(--font-display);
+    font-family: var(--os-font-display), ui-serif, Georgia, serif;
     font-optical-sizing: auto;
-    letter-spacing: -0.015em;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    letter-spacing: -0.02em;
     font-size: calc(1em * var(--os-display-scale, 1));
   }
 
   .os-prose {
-    font-family: var(--font-body);
+    font-family: var(--os-font-body), ui-serif, Georgia, serif;
     font-size: 1.125rem;
-    line-height: 1.75;
+    line-height: 1.8;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
 
+  .os-hand {
+    font-family: var(--font-caveat), "Segoe Print", cursive;
+    letter-spacing: 0;
+  }
+
   .os-eyebrow {
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--os-primary);
   }
@@ -93,26 +157,392 @@
     margin-top: var(--os-section-gap, 2.75rem);
   }
 
-  /* Backgrounds */
-  .os-bg-plain {
-    background-color: var(--os-bg);
+  /* Ambient background --------------------------------------------------------- */
+
+  .os-ambient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
   }
 
-  .os-bg-paper {
+  .os-ambient-blob {
+    position: absolute;
+    width: 70vmax;
+    height: 70vmax;
+    border-radius: 50%;
+  }
+  .os-ambient-blob:nth-child(1) {
+    top: -30vmax;
+    left: -20vmax;
+    background: radial-gradient(closest-side, var(--os-blob-1), transparent);
+  }
+  .os-ambient-blob:nth-child(2) {
+    top: 10vmax;
+    right: -30vmax;
+    background: radial-gradient(closest-side, var(--os-blob-2), transparent);
+  }
+  .os-ambient-blob:nth-child(3) {
+    bottom: -35vmax;
+    left: 15vmax;
+    background: radial-gradient(closest-side, var(--os-blob-3), transparent);
+  }
+  /* The drift keeps the GPU busy every frame, so only large screens get it. */
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .os-ambient-blob {
+      will-change: transform;
+    }
+    .os-ambient-blob:nth-child(1) {
+      animation: os-drift-a 26s ease-in-out infinite alternate;
+    }
+    .os-ambient-blob:nth-child(2) {
+      animation: os-drift-b 32s ease-in-out infinite alternate;
+    }
+    .os-ambient-blob:nth-child(3) {
+      animation: os-drift-c 38s ease-in-out infinite alternate;
+    }
+  }
+
+  /*
+   * Inside the workspace (.os-space) the couple's own themed backdrop covers the
+   * site-wide one from the root layout; don't keep drawing the hidden copy.
+   */
+  body:has(.os-space) > .os-ambient,
+  body:has(.os-space) > .os-grain-layer {
+    display: none;
+  }
+
+  /* Static on purpose: an animated or blended full-screen layer repaints constantly. */
+  .os-grain-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: var(--os-grain-opacity, 0.07);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /*
+   * Page backgrounds. Anything that should stay put while the page scrolls is
+   * drawn on a fixed layer (background-attachment: fixed repaints on every
+   * scroll frame).
+   */
+  .os-bg-aurora,
+  .os-bg-plain,
+  .os-bg-grain,
+  .os-bg-retro,
+  .os-bg-paper,
+  .os-bg-gradient {
     background-color: var(--os-bg);
+  }
+  .os-bg-retro::before,
+  .os-bg-paper::before,
+  .os-bg-gradient::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .os-bg-retro::before {
+    background-image:
+      radial-gradient(color-mix(in srgb, var(--os-primary) 16%, transparent) 1px, transparent 1.5px),
+      radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--os-primary) 14%, transparent), transparent 60%);
+    background-size:
+      18px 18px,
+      100% 100%;
+  }
+  .os-bg-paper::before {
     background-image:
       radial-gradient(1200px 600px at 12% -10%, color-mix(in srgb, var(--os-primary) 7%, transparent), transparent 70%),
       radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--os-ink) 4%, transparent), transparent 70%);
-    background-attachment: fixed;
+  }
+  .os-bg-gradient::before {
+    background-image: linear-gradient(170deg, var(--os-blob-2) 0%, var(--os-bg) 40%, var(--os-blob-3) 120%);
   }
 
-  .os-bg-grain {
-    background-color: var(--os-bg);
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  /* Motion --------------------------------------------------------------------- */
+
+  /*
+   * Entrance animations use fill-mode "backwards", never "both": a finished
+   * animation that keeps its end transform turns the element into the
+   * containing block for position: fixed descendants (the scrapbook editor
+   * dock ended up mid-page on phones), and keeps a GPU layer alive for nothing.
+   *
+   * Page enter is short and small, so switching sections never feels like waiting.
+   */
+  .os-page-enter {
+    animation: os-page-in 0.25s var(--os-ease-out) backwards;
   }
 
-  .os-bg-gradient {
-    background-color: var(--os-bg);
-    background-image: linear-gradient(180deg, var(--os-primary-soft) 0%, var(--os-bg) 520px);
+  .os-reveal {
+    animation: os-fade-up 0.45s var(--os-ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+  @supports (animation-timeline: view()) {
+    .os-reveal {
+      animation: os-reveal-view linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+
+  .os-pop {
+    animation: os-pop 0.45s var(--os-ease-spring) backwards;
+  }
+  .os-float {
+    animation: os-float 6s ease-in-out infinite;
+  }
+  .os-wiggle:hover {
+    animation: os-wiggle 0.5s ease-in-out;
+  }
+
+  /* Scrapbook materials --------------------------------------------------------- */
+
+  .os-polaroid {
+    background: #fffdf8;
+    padding: 0.55rem 0.55rem 2.4rem;
+    border-radius: 3px;
+    box-shadow:
+      0 1px 2px rgb(40 25 10 / 0.12),
+      0 14px 30px -14px rgb(40 25 10 / 0.35);
+    color: #3b2f2a;
+    transform: rotate(var(--tilt, 0deg));
+    transition:
+      transform 0.45s var(--os-ease-spring),
+      box-shadow 0.45s var(--os-ease-out);
+  }
+  .os-polaroid:hover,
+  .os-polaroid:focus-within,
+  :focus-visible > .os-polaroid {
+    transform: rotate(0deg) translateY(-4px) scale(1.02);
+    box-shadow:
+      0 2px 4px rgb(40 25 10 / 0.12),
+      0 26px 50px -20px rgb(40 25 10 / 0.45);
+  }
+
+  .os-tape {
+    display: block;
+    height: 1.6rem;
+    width: 6.5rem;
+    background-color: var(--tape, color-mix(in srgb, var(--os-primary) 45%, #fff6));
+    opacity: 0.85;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+    mask-image: linear-gradient(90deg, transparent 0 2px, #000 2px calc(100% - 2px), transparent calc(100% - 2px));
+    clip-path: polygon(2% 0, 98% 4%, 100% 50%, 97% 100%, 3% 96%, 0 50%);
+  }
+  .os-tape[data-pattern="stripes"] {
+    background-image: repeating-linear-gradient(45deg, rgb(255 255 255 / 0.45) 0 6px, transparent 6px 12px);
+  }
+  .os-tape[data-pattern="dots"] {
+    background-image: radial-gradient(rgb(255 255 255 / 0.65) 2px, transparent 2.5px);
+    background-size: 12px 12px;
+  }
+  .os-tape[data-pattern="grid"] {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.45) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.45) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+  .os-tape[data-pattern="checks"] {
+    background-image: repeating-conic-gradient(rgb(255 255 255 / 0.4) 0 25%, transparent 0 50%);
+    background-size: 14px 14px;
+  }
+
+  .os-sticky {
+    background: var(--note, #fff1a8);
+    color: #3b2f2a;
+    box-shadow:
+      0 1px 1px rgb(0 0 0 / 0.08),
+      0 16px 24px -18px rgb(0 0 0 / 0.45);
+    border-radius: 2px 2px 18px 2px / 2px 2px 8px 2px;
+    transform: rotate(var(--tilt, 0deg));
+  }
+
+  .os-stamp {
+    display: inline-grid;
+    place-items: center;
+    border: 2px dashed currentColor;
+    border-radius: 0.6rem;
+    padding: 0.35rem 0.6rem;
+    font-family: var(--font-special-elite), "Courier New", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transform: rotate(var(--tilt, -4deg));
+  }
+
+  .os-sticker {
+    filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff)
+      drop-shadow(0 4px 6px rgb(0 0 0 / 0.22));
+  }
+
+  .os-emoji {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    line-height: 1;
+  }
+
+  /* Scrapbook page paper (sizes use container units; see scrapbook-page.tsx) */
+  .os-paper {
+    background-color: var(--paper, #fbf6ec);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.6) inset,
+      0 30px 60px -30px rgb(40 25 10 / 0.45),
+      0 2px 6px rgb(40 25 10 / 0.08);
+  }
+  .os-paper[data-paper="lined"] {
+    background-image:
+      linear-gradient(90deg, transparent 7.9cqw, rgb(220 90 90 / 0.35) 7.9cqw 8.1cqw, transparent 8.1cqw),
+      repeating-linear-gradient(transparent 0 3.6cqw, rgb(90 130 190 / 0.22) 3.6cqw 3.7cqw);
+  }
+  .os-paper[data-paper="grid"] {
+    background-image:
+      linear-gradient(rgb(90 130 190 / 0.16) 0.1cqw, transparent 0.1cqw),
+      linear-gradient(90deg, rgb(90 130 190 / 0.16) 0.1cqw, transparent 0.1cqw);
+    background-size: 3.2cqw 3.2cqw;
+  }
+  .os-paper[data-paper="dots"] {
+    background-image: radial-gradient(rgb(60 50 40 / 0.22) 0.18cqw, transparent 0.24cqw);
+    background-size: 3cqw 3cqw;
+  }
+  .os-paper[data-paper="kraft"] {
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='k'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4'/><feColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23k)'/></svg>");
+  }
+  .os-paper[data-paper="cork"] {
+    background-image:
+      radial-gradient(rgb(90 55 25 / 0.35) 0.25cqw, transparent 0.35cqw),
+      radial-gradient(rgb(255 230 190 / 0.25) 0.2cqw, transparent 0.3cqw),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0 0.1 0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23c)'/></svg>");
+    background-size:
+      2.1cqw 2.3cqw,
+      3.3cqw 2.9cqw,
+      auto;
+  }
+}
+
+/* Keyframes ------------------------------------------------------------------------ */
+
+@keyframes os-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-reveal-view {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(var(--pop-rotate, -6deg));
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-8px) rotate(calc(var(--tilt, 0deg) + 3deg));
+  }
+}
+
+@keyframes os-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes os-drift-a {
+  to {
+    transform: translate(12vmax, 8vmax) scale(1.15);
+  }
+}
+@keyframes os-drift-b {
+  to {
+    transform: translate(-14vmax, 10vmax) scale(0.9);
+  }
+}
+@keyframes os-drift-c {
+  to {
+    transform: translate(10vmax, -12vmax) scale(1.1);
+  }
+}
+
+@keyframes os-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes os-heart-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) scale(1.1) rotate(12deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .os-ambient-blob,
+  .os-reveal {
+    animation: none !important;
   }
 }

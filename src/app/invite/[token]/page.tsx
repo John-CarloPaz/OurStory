@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 import { signOut } from "@/app/actions/auth";
 import { buttonClass } from "@/components/ui/button";
 import { AUTO_JOIN_COOKIE } from "@/lib/cookies";
-import { APP_NAME } from "@/lib/env";
 import { getInvitationPreview, INVITATION_STATUS_COPY } from "@/lib/invitations/service";
 import { isWellFormedInvitationToken } from "@/lib/invitations/token";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/tenant";
+import { BrandMark } from "@/components/decor/scene";
+import { Envelope, InviterName } from "./envelope";
 import { ClearPendingInvitation, CompleteInvitedAccountForm, InviteChoice, JoinSpaceForm } from "./invite-forms";
 import { SessionFromLink } from "./session-from-link";
 
@@ -20,15 +21,14 @@ function maskEmail(email: string) {
   return `${local.slice(0, 1)}${"•".repeat(Math.max(2, local.length - 1))}@${domain}`;
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+/** `sealed` adds the wax seal and address line, for invitations that can still be accepted. */
+function Shell({ children, sealed = false }: { children: React.ReactNode; sealed?: boolean }) {
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-12">
+    <main className="relative grid min-h-dvh place-items-center overflow-x-clip px-4 py-10 sm:py-16">
       <div className="w-full max-w-md">
-        <Link href="/" className="os-display mb-8 block text-center text-2xl text-ink">
-          {APP_NAME} <span className="text-accent">♡</span>
-        </Link>
+        <BrandMark href="/" className="mx-auto mb-9 text-2xl" />
         <SessionFromLink />
-        <div className="os-card p-8 sm:p-10">{children}</div>
+        <Envelope sealed={sealed}>{children}</Envelope>
       </div>
     </main>
   );
@@ -41,7 +41,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     return (
       <Shell>
         <ClearPendingInvitation />
-        <h1 className="os-display text-3xl text-ink">{INVITATION_STATUS_COPY.not_found.title}</h1>
+        <h1 className="os-display text-3xl leading-tight font-medium text-ink">{INVITATION_STATUS_COPY.not_found.title}</h1>
         <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">{INVITATION_STATUS_COPY.not_found.body}</p>
       </Shell>
     );
@@ -58,7 +58,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     return (
       <Shell>
         <ClearPendingInvitation />
-        <h1 className="os-display text-3xl text-ink">{copy.title}</h1>
+        <h1 className="os-display text-3xl leading-tight font-medium text-ink">{copy.title}</h1>
         <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
           {preview.status === "expired" && preview.inviter_name
             ? `Ask ${preview.inviter_name} to send you a new invitation.`
@@ -76,11 +76,11 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   if (!session) {
     return (
-      <Shell>
+      <Shell sealed>
         <p className="os-eyebrow">Private invitation</p>
-        <h1 className="os-display mt-3 text-4xl text-ink">You&apos;re invited.</h1>
-        <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
-          {inviter} has invited you to join their private space.
+        <h1 className="os-display mt-3 text-[2.75rem] leading-none font-medium text-ink sm:text-5xl">You&apos;re invited.</h1>
+        <p className="mt-4 text-[0.9375rem] leading-relaxed text-muted">
+          <InviterName className="mr-1 text-[1.75rem]">{inviter}</InviterName> has invited you to join their private space.
         </p>
         <InviteChoice token={token} email={email} inviter={inviter} />
       </Shell>
@@ -90,13 +90,13 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   if (preview.viewer_email_matches === false) {
     return (
       <Shell>
-        <h1 className="os-display text-3xl text-ink">This invitation is for someone else.</h1>
-        <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
+        <h1 className="os-display text-3xl leading-tight font-medium text-ink">This invitation is for someone else.</h1>
+        <p className="mt-3 text-[0.9375rem] leading-relaxed break-words text-muted">
           It was sent to {maskEmail(email)}, but you&apos;re signed in as {session.email}. Sign in with the invited email to accept it.
         </p>
         <form action={signOut} className="mt-8">
           <input type="hidden" name="next" value={`/invite/${token}`} />
-          <button type="submit" className={buttonClass("primary")}>
+          <button type="submit" className={buttonClass("primary", "md", "w-full sm:w-auto")}>
             Sign out and switch account
           </button>
         </form>
@@ -106,11 +106,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
   if (session.metadata.needs_password) {
     return (
-      <Shell>
+      <Shell sealed>
         <p className="os-eyebrow">Almost there</p>
-        <h1 className="os-display mt-3 text-3xl text-ink">Create your account</h1>
+        <h1 className="os-display mt-3 text-3xl leading-tight font-medium text-ink sm:text-4xl">Create your account</h1>
         <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">
-          {inviter} invited you to join Our Story. Choose your name and a password, and you&apos;re in.
+          <InviterName className="mr-1 text-[1.6rem]">{inviter}</InviterName> invited you to join Our Story. Choose your name and a
+          password, and you&apos;re in.
         </p>
         <CompleteInvitedAccountForm token={token} email={email} defaultName={session.metadata.display_name ?? ""} />
       </Shell>
@@ -120,10 +121,12 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
   const autoJoin = (await cookies()).get(AUTO_JOIN_COOKIE)?.value === token;
 
   return (
-    <Shell>
+    <Shell sealed>
       <p className="os-eyebrow">Welcome back.</p>
-      <h1 className="os-display mt-3 text-3xl text-ink">You&apos;ve been invited to join:</h1>
-      <p className="os-display mt-4 text-2xl text-accent">{inviter}&apos;s Our Story space.</p>
+      <h1 className="os-display mt-3 text-3xl leading-tight font-medium text-ink">You&apos;ve been invited to join:</h1>
+      <p className="os-display mt-4 text-2xl leading-snug text-accent">
+        <InviterName className="mr-0.5 text-[2.1rem]">{inviter}&apos;s</InviterName> Our Story space.
+      </p>
       <JoinSpaceForm token={token} autoSubmit={autoJoin} />
     </Shell>
   );

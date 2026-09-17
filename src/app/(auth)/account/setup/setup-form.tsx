@@ -21,7 +21,7 @@ export function AccountSetupForm({ email, defaultName, next }: { email: string; 
         <Input name="password" type="password" required minLength={8} autoComplete="new-password" state={state} />
       </Field>
       <FormMessage state={state} />
-      <SubmitButton pending={pending} className="w-full" pendingText="Saving…">
+      <SubmitButton pending={pending} size="lg" className="w-full" pendingText="Saving…">
         Continue
       </SubmitButton>
     </form>

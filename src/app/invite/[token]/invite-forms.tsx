@@ -2,7 +2,7 @@
 
 import { MailCheck } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   acceptInvitationAction,
   clearPendingInvitation,
@@ -25,6 +25,9 @@ export function InviteChoice({ token, email, inviter }: { token: string; email: 
         <Button size="lg" onClick={() => setCreating(true)}>
           Create Account
         </Button>
+        <p aria-hidden className="os-hand text-center text-lg leading-none text-muted">
+          or
+        </p>
         <Link href={loginHref} className={buttonClass("secondary", "lg")}>
           I already have an account
         </Link>
@@ -42,16 +45,22 @@ function InvitedSignUpForm({ token, email, inviter, loginHref }: { token: string
 
   if (state.code === "check_email") {
     return (
-      <div className="mt-8 rounded-2xl bg-accent-soft p-5">
-        <MailCheck className="mb-3 size-5 text-accent" aria-hidden />
-        <p className="text-[0.9375rem] leading-relaxed text-ink">{state.message}</p>
-        <p className="mt-2 text-sm text-muted">Your invitation from {inviter} will be waiting.</p>
+      <div className="os-pop mt-9">
+        <div className="os-sticky relative p-5 pt-6 text-[#3b2f2a]" style={{ "--note": "#fff1a8", "--tilt": "-1.5deg" } as CSSProperties}>
+          <span
+            aria-hidden
+            className="absolute -top-2 left-1/2 size-4 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_35%_35%,#ff8b8b,#c2410c)] shadow"
+          />
+          <MailCheck className="mb-3 size-5 text-[#b4553d]" aria-hidden />
+          <p className="text-[0.9375rem] leading-relaxed">{state.message}</p>
+          <p className="os-hand mt-2 text-xl leading-snug opacity-80">Your invitation from {inviter} will be waiting.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <form {...formProps} className="mt-8 space-y-5">
+    <form {...formProps} className="os-page-enter mt-8 space-y-5 border-t border-dashed border-line pt-7">
       <h2 className="os-display text-2xl text-ink">Create your account</h2>
       <input type="hidden" name="token" value={token} />
       <Field label="Name" name="displayName" state={state}>

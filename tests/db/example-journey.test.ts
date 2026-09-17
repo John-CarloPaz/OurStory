@@ -56,7 +56,7 @@ describe("John and Kath", () => {
     expect(result).toMatchObject({ invited_email: "kath@example.com", inviter_name: "John", couple_label: "John & Kath" });
 
     const theme = await db.query(john, `select name, card_style, typography from couple_themes where couple_id = $1`, [coupleId]);
-    expect(theme.rows[0]).toEqual({ name: "paper", card_style: "soft", typography: "editorial" });
+    expect(theme.rows[0]).toEqual({ name: "paper", card_style: "glass", typography: "editorial" });
   });
 
   it("Kath opens the invitation and sees that John invited her", async () => {
