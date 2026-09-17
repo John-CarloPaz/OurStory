@@ -94,6 +94,8 @@ export default async function JournalPage({ params }: { params: Promise<{ id: st
       <section aria-label="Scrapbook page">
         <ScrapbookBoard
           journalId={journal.id}
+          title={journal.title}
+          entryDate={journal.entry_date}
           scrapbook={scrapbook}
           generated={generated}
           saved={saved}

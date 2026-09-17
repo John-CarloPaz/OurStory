@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateLayout, resolveScrapbook, scrapbookSchema, type Scrapbook } from "@/lib/scrapbook/model";
+import { generateLayout, resolveScrapbook, scrapbookFileName, scrapbookSchema, type Scrapbook } from "@/lib/scrapbook/model";
 
 const PHOTO_A = "11111111-1111-4111-8111-111111111111";
 const PHOTO_B = "22222222-2222-4222-8222-222222222222";
@@ -69,5 +69,18 @@ describe("scrapbook model", () => {
 
     const many = Array.from({ length: 121 }, (_, i) => ({ ...text, id: `text-${String(i).padStart(3, "0")}`, text: "x" }));
     expect(scrapbookSchema.safeParse({ ...base, elements: many }).success).toBe(false);
+  });
+});
+
+describe("scrapbookFileName", () => {
+  it("makes a readable, safe file name from the entry title and date", () => {
+    expect(scrapbookFileName("Bumble Match!", "2026-06-01")).toBe("bumble-match-2026-06-01.png");
+    expect(scrapbookFileName("Café Lumière ♡ date night", "2026-09-19")).toBe("cafe-lumiere-date-night-2026-09-19.png");
+    expect(scrapbookFileName("../../etc/passwd", null)).toBe("etc-passwd.png");
+  });
+
+  it("falls back when the title has nothing usable", () => {
+    expect(scrapbookFileName("♡♡♡", "2026-06-01")).toBe("scrapbook-page-2026-06-01.png");
+    expect(scrapbookFileName("", "not a date")).toBe("scrapbook-page.png");
   });
 });

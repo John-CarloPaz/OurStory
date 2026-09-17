@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { switchSpace } from "@/app/actions/spaces";
 import { Avatar } from "@/components/ui/layout";
+import { HeaderMenu } from "./header-menu";
 import { DesktopNav } from "./space-nav";
 
 type Props = {
@@ -36,11 +37,14 @@ export function SpaceHeader({ names, title, waitingForPartner, members, membersh
 
         <DesktopNav />
 
-        <details className="group relative">
-          <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full text-muted transition hover:bg-accent-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-            <span className="sr-only">Menu</span>
-            <Settings className="size-5 transition-transform duration-500 group-open:rotate-90" aria-hidden />
-          </summary>
+        <HeaderMenu
+          summary={
+            <summary className="grid size-10 cursor-pointer list-none place-items-center rounded-full text-muted transition hover:bg-accent-soft hover:text-ink [&::-webkit-details-marker]:hidden">
+              <span className="sr-only">Menu</span>
+              <Settings className="size-5 transition-transform duration-500 group-open:rotate-90" aria-hidden />
+            </summary>
+          }
+        >
           <div className="os-glass os-frost absolute right-0 z-50 mt-3 w-72 origin-top-right animate-[os-pop_0.3s_cubic-bezier(0.34,1.56,0.64,1)_backwards] rounded-3xl p-2 text-sm shadow-2xl">
             <p className="truncate px-3 pt-2 pb-3 text-xs text-muted">{email}</p>
             <Link href="/settings" className="flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-ink hover:bg-accent-soft">
@@ -72,7 +76,7 @@ export function SpaceHeader({ names, title, waitingForPartner, members, membersh
               </button>
             </form>
           </div>
-        </details>
+        </HeaderMenu>
       </div>
     </header>
   );

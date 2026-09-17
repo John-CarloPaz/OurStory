@@ -402,6 +402,7 @@ export function ScrapbookEditor({
       active ? "border-accent bg-accent text-on-accent" : "border-line bg-[var(--os-glass)] text-ink hover:border-accent/60"
     }`;
   const iconButton = "grid size-9 place-items-center rounded-full border border-line bg-[var(--os-glass)] text-ink transition hover:border-accent/60 disabled:opacity-40";
+  const tabButton = "flex min-w-0 flex-col items-center gap-0.5 rounded-2xl px-0.5 py-2 text-[0.65rem] font-medium transition";
 
   let panelBody: React.ReactNode = null;
   if (panel === "selected" && selected) {
@@ -635,7 +636,7 @@ export function ScrapbookEditor({
   }
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_21rem]">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="space-y-3">
         <div className="os-glass os-frost sticky top-20 z-30 flex items-center gap-2 rounded-full p-1.5 shadow-lg">
           <button type="button" onClick={cancel} className="rounded-full px-3 py-2 text-sm text-muted hover:text-ink">
@@ -720,30 +721,27 @@ export function ScrapbookEditor({
       </div>
 
       <aside className="os-glass os-frost fixed inset-x-0 bottom-0 z-[60] rounded-t-[1.75rem] pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_40px_-20px_rgb(0_0_0/0.35)] lg:sticky lg:top-24 lg:z-auto lg:rounded-[1.75rem] lg:pb-0">
-        <div className="flex gap-1 overflow-x-auto p-2 [scrollbar-width:none]">
+        {/* Equal columns, so every tab (including Edit) fits without sideways scrolling. */}
+        <div className={`grid gap-1 p-2 ${selected ? "grid-cols-6" : "grid-cols-5"}`}>
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
               onClick={() => setPanel(id)}
-              className={`flex min-w-14 flex-1 flex-col items-center gap-0.5 rounded-2xl px-2 py-2 text-[0.65rem] font-medium transition ${
-                panel === id ? "bg-accent text-on-accent shadow" : "text-muted hover:bg-accent-soft hover:text-ink"
-              }`}
+              className={`${tabButton} ${panel === id ? "bg-accent text-on-accent shadow" : "text-muted hover:bg-accent-soft hover:text-ink"}`}
             >
               <Icon className="size-4" aria-hidden />
-              {label}
+              <span className="max-w-full truncate">{label}</span>
             </button>
           ))}
           {selected ? (
             <button
               type="button"
               onClick={() => setPanel("selected")}
-              className={`flex min-w-14 flex-1 flex-col items-center gap-0.5 rounded-2xl px-2 py-2 text-[0.65rem] font-medium transition ${
-                panel === "selected" ? "bg-accent text-on-accent shadow" : "text-accent hover:bg-accent-soft"
-              }`}
+              className={`${tabButton} ${panel === "selected" ? "bg-accent text-on-accent shadow" : "text-accent hover:bg-accent-soft"}`}
             >
               <Wand2 className="size-4" aria-hidden />
-              Edit
+              <span className="max-w-full truncate">Edit</span>
             </button>
           ) : null}
         </div>

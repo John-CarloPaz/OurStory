@@ -42,16 +42,19 @@ export function elementBoxStyle(el: ScrapElement): CSSProperties {
   };
 }
 
-function PhotoView({ el, sources }: { el: PhotoElement; sources?: PhotoSources[string] }) {
-  // Large photos use the original; small ones the thumbnail.
-  const src = (el.w > 560 ? (sources?.full ?? sources?.thumb) : (sources?.thumb ?? sources?.full)) ?? null;
+/** "auto": large photos use the original, small ones the thumbnail. "export": always the original, loaded right away. */
+export type PhotoQuality = "auto" | "export";
+
+function PhotoView({ el, sources, quality }: { el: PhotoElement; sources?: PhotoSources[string]; quality: PhotoQuality }) {
+  const preferFull = quality === "export" || el.w > 560;
+  const src = (preferFull ? (sources?.full ?? sources?.thumb) : (sources?.thumb ?? sources?.full)) ?? null;
   const image = src ? (
     // eslint-disable-next-line @next/next/no-img-element -- signed private URL
     <img
       src={src}
       alt={el.caption ?? ""}
       draggable={false}
-      loading="lazy"
+      loading={quality === "export" ? "eager" : "lazy"}
       decoding="async"
       className="block w-full object-cover select-none"
       style={{ aspectRatio: `1 / ${el.frame === "circle" ? 1 : el.aspect}`, borderRadius: el.frame === "circle" ? "50%" : el.frame === "rounded" ? "7%" : undefined }}
@@ -169,10 +172,10 @@ function TextView({ el }: { el: TextElement }) {
   }
 }
 
-export function ElementView({ el, photos }: { el: ScrapElement; photos: PhotoSources }) {
+export function ElementView({ el, photos, quality = "auto" }: { el: ScrapElement; photos: PhotoSources; quality?: PhotoQuality }) {
   switch (el.type) {
     case "photo":
-      return <PhotoView el={el} sources={photos[el.photoId]} />;
+      return <PhotoView el={el} sources={photos[el.photoId]} quality={quality} />;
     case "text":
       return <TextView el={el} />;
     case "tape":
@@ -203,6 +206,8 @@ export function ScrapbookPage({
   renderElement,
   children,
   animate = false,
+  quality = "auto",
+  rounded = true,
 }: {
   scrapbook: Scrapbook;
   photos: PhotoSources;
@@ -211,6 +216,9 @@ export function ScrapbookPage({
   renderElement?: (el: ScrapElement, content: ReactNode) => ReactNode;
   children?: ReactNode;
   animate?: boolean;
+  quality?: PhotoQuality;
+  /** Square corners suit an exported image (transparent corners show up black in some apps). */
+  rounded?: boolean;
 }) {
   const height = pageHeight(scrapbook);
   const ordered = [...scrapbook.elements].sort((a, b) => a.z - b.z);
@@ -218,11 +226,11 @@ export function ScrapbookPage({
     <div className={`[container-type:inline-size] ${className}`}>
       <div
         data-paper={scrapbook.page.paper}
-        className="os-paper relative w-full overflow-hidden rounded-[1.2cqw]"
+        className={`os-paper relative w-full overflow-hidden ${rounded ? "rounded-[1.2cqw]" : ""}`}
         style={{ aspectRatio: `${PAGE_WIDTH} / ${height}`, "--paper": scrapbook.page.color } as CSSProperties}
       >
         {ordered.map((el, index) => {
-          const content = <ElementView el={el} photos={photos} />;
+          const content = <ElementView el={el} photos={photos} quality={quality} />;
           if (renderElement) return <div key={el.id}>{renderElement(el, content)}</div>;
           return (
             <div key={el.id} style={elementBoxStyle(el)}>

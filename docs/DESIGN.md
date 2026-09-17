@@ -46,7 +46,8 @@ All motion is disabled automatically under `prefers-reduced-motion`.
 - `@/components/ui/button`: `Button`, `LinkButton`, `buttonClass(variant, size, className)`. Variants: primary (gradient), secondary (glass), ghost, danger.
 - `@/components/ui/form`: `Field`, `Input`, `Textarea`, `Select`, `SubmitButton` (pass `pending`), `FormMessage`, `ConfirmSubmit`. Forms use `useFormAction` from `@/components/ui/use-form-action` and spread `formProps` on `<form>`.
 - `@/components/decor/materials`: `Tape`, `Polaroid`, `StickyNote`, `Stamp`, `Doodle` (heart, star, sparkle, squiggle, arrow, underline, circle).
-- `@/components/scrapbook/scrapbook-page`: `ScrapbookPage` renders a scrapbook page at any size.
+- `@/components/scrapbook/scrapbook-page`: `ScrapbookPage` renders a scrapbook page at any size (`quality="export"` loads original photos right away, for image export).
+- `@/lib/scrapbook/export-image`: turns a rendered page into a PNG (download, or the share sheet on iPhone/iPad). Used by the Download button on each entry.
 
 ## Layout and responsiveness
 
